@@ -1,0 +1,42 @@
+ROTEIRO DE COMPILAÇÃO E EXECUÇÃO
+----------------------------------
+
+Este projeto foi implementado em Haskell e gerenciado com um Makefile.
+
+**Requisitos:**
+1. O compilador Glasgow Haskell Compiler (GHC) deve estar instalado.
+   (ex: `sudo apt-get install ghc` ou `brew install ghc`)
+2. A ferramenta 'make'.
+   (ex: `sudo apt-get install build-essential`)
+
+**1. Compilação**
+
+Para compilar o programa, navegue até o diretório raiz do projeto
+(onde estão o `Passeio.hs` e o `Makefile`) e execute o comando:
+
+   make
+
+Isso irá invocar o GHC com as flags de otimização corretas e gerará
+um arquivo executável chamado `passeio`.
+
+**2. Execução**
+
+O programa lê da "entrada padrão" (stdin) e escreve na "saída padrão" (stdout),
+conforme as boas práticas de programas de linha de comando.
+
+Para executar o programa, você deve redirecionar um arquivo de entrada.
+Um arquivo `entrada.txt` é fornecido como exemplo.
+
+Execute o programa com o seguinte comando:
+
+   ./passeio < entrada.txt
+
+A saída será impressa diretamente na tela, mostrando o resultado para cada
+linha de teste contida no `entrada.txt`.
+
+**3. Limpeza**
+
+Para remover os arquivos compilados (o executável `passeio` e os arquivos
+intermediários *.o e *.hi), execute:
+
+   make clean

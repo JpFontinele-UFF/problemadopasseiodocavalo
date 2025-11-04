@@ -1,0 +1,22 @@
+# entrada.txt
+#
+# Formato: Linhas Colunas LinhaInicial ColunaInicial
+
+# Caso 1: Um tabuleiro 5x5, começando em (1,1).
+# Este caso clássico tem solução.
+5 5 1 1
+
+# Caso 2: Um tabuleiro 3x3, começando em (1,1).
+# É impossível visitar todas as 9 casas.
+3 3 1 1
+
+# Caso 3: Um tabuleiro 6x6, começando em (1,1).
+# Também tem solução.
+6 6 1 1
+
+# Caso 4: Um tabuleiro 8x8, começando em (1,1).
+# O clássico.
+8 8 1 1
+
+# Caso 5: Uma entrada inválida (posição inicial fora)
+5 5 6 1
