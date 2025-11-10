@@ -1,27 +1,13 @@
--- Passeio.hs
---
--- Para compilar: cd app -> ghc Passeio.hs
--- Para executar: ./Passeio 
---
--- Alunos: João Pedro Fontinele e Valter Neto
--- Disciplina: Linguagens de Programação
--- Professor: Bruno Lopes Vieira
-
--- Importamos Data.Set para um controle eficiente das casas visitadas.
--- Importamos Control.Monad para a função 'msum', que nos ajuda a
--- encontrar a primeira solução válida (o primeiro 'Just') de uma lista.
+-- Data.Set para um controle eficiente das casas visitadas. uma árvore binária balanceada
+-- Control.Monad para a função 'msum', que encontra a primeira solução válida (o primeiro 'Just') de uma lista.
 import qualified Data.Set as Set
 import Control.Monad (msum)
 
--- Definição de tipos para clareza
+-- Definição de tipos 
 type Position = (Int, Int)    -- (Linha, Coluna)
 type BoardDims = (Int, Int)   -- (TotalLinhas, TotalColunas)
 type Path = [Position]      -- O caminho percorrido
 type VisitedSet = Set.Set Position -- Casas já visitadas
-
--- ---
--- O Núcleo do Problema: O Solver (Backtracking)
--- ---
 
 -- Lista de todos os 8 movimentos relativos do cavalo
 knightMoves :: [Position]
@@ -37,28 +23,29 @@ isOnBoard (rows, cols) (r, c) =
 -- retorna a lista de próximos movimentos válidos.
 validMoves :: BoardDims -> VisitedSet -> Position -> [Position]
 validMoves dims visited (r, c) =
-    let
+    let 
         -- Calcula todas as 8 posições de destino
-        potentialMoves = map (\(dr, dc) -> (r + dr, c + dc)) knightMoves
+        potentialMoves = map (\(kr, kc) -> (r + kr, c + kc)) knightMoves
     in
         -- Filtra apenas as que estão no tabuleiro E não foram visitadas
-        filter (\pos -> isOnBoard dims pos && not (pos `Set.member` visited)) potentialMoves
+        filter (\pMoves -> isOnBoard dims pMoves && not (pMoves `Set.member` visited)) potentialMoves
 
 -- A função de backtracking principal.
--- Retorna 'Maybe Path' - 'Just caminho' se encontrar, 'Nothing' se não.
+-- Retorna 'Maybe Path' - 'Just path' se encontrar, 'Nothing' se não.
 -- O caminho é construído de forma REVERSA (mais eficiente com 'cons' [:])
-solve :: Int -> BoardDims -> VisitedSet -> Path -> Maybe Path
-solve totalSquares dims visited path@(currentPos:_) =
+knightTourSolver :: Int -> BoardDims -> VisitedSet -> Path -> Maybe Path
+knightTourSolver totalSquares dims visited path@(currentPos:_) =
 
     -- Caso Base: Encontramos uma solução?
     if Set.size visited == totalSquares
     then Just path -- Sim, visitamos todas as casas. Retorna o caminho.
     else
         -- Passo Recursivo: Tentar todos os próximos movimentos válidos
+        -- Ex: [Nothing, Nothing, Just [...], Nothing] (Onde o terceiro movimento levou a uma solução, mas os outros falharam).
         let
             nextMoves = validMoves dims visited currentPos
-            -- Mapeia a função 'solve' para cada próximo movimento
-            results = map (\move -> solve totalSquares dims (Set.insert move visited) (move : path)) nextMoves
+            -- Mapeia a função 'knightTourSolver' para cada próximo movimento
+            results = map (\move -> knightTourSolver totalSquares dims (Set.insert move visited) (move : path)) nextMoves
         in
             -- 'msum' pega a primeira solução 'Just' na lista de 'Maybes'.
             -- Se todos forem 'Nothing', retorna 'Nothing'.
@@ -76,16 +63,15 @@ findOpenTour :: BoardDims -> Position -> Maybe Path
 findOpenTour dims@(rows, cols) startPos =
     let
         totalSquares = rows * cols
-        -- Inicia o solver.
-        -- O 'solve' retorna o caminho reverso (ex: [posFim, ..., posInicio])
-        maybeTour = solve totalSquares dims (Set.singleton startPos) [startPos]
+        -- Inicia o knightTourSolver.
+        -- retorna o caminho reverso (ex: [posFim, ..., posInicio])
+        maybeTour = knightTourSolver totalSquares dims (Set.singleton startPos) [startPos]
     in
     case maybeTour of
         Nothing -> Nothing -- Solver não encontrou *nenhum* caminho
         Just path -> -- Solver encontrou um caminho!
             let
                 endPos = head path   -- O último local visitado (head, pois o caminho está reverso)
-                -- startPos é o 'startPos' original da função
             in
             -- Verifica a condição do "tour aberto":
             -- A primeira posição (startPos) NÃO PODE ser alcançada
@@ -128,7 +114,7 @@ processLine line = do
     else
         return () -- Ignora a linha
 
--- Formata e imprime a saída na tela, como pedido
+-- Formata e imprime a saída na tela
 printResult :: BoardDims -> Position -> Maybe Path -> IO ()
 printResult dims startPos (Just path) = do
     putStrLn $ "CASO: " ++ show dims ++ " inicio: " ++ show startPos
